@@ -14,6 +14,6 @@ public class ClassA {
      public void soma(){
         int a;
         float b;
-       
+       int soma = a;
      }
 }
