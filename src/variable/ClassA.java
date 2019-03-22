@@ -12,7 +12,7 @@ package variable;
 public class ClassA {
     
      public void soma(){
-        int a;
+        int x;
         float b;
        
      }
