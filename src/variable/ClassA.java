@@ -11,9 +11,13 @@ package variable;
  */
 public class ClassA {
     
+     public void sub(){
+        int s;
+     }
+     
      public void soma(){
         int x;
-        float b;
+        float y;
        int soma = a;
      }
 }
