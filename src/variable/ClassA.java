@@ -19,5 +19,6 @@ public class ClassA {
         int x;
         float y;
        int soma = a;
+       float multi = b;
      }
 }
