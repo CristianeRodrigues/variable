@@ -286,7 +286,7 @@ def file_exists(file_name):
 	return True
 
 
-def files_attributes(diff_a_b):
+def files_attributes(diff_a_b, file_extensions):
 	files_edited = set()
 	files_add = set()
 	files_rm = set()
@@ -312,10 +312,10 @@ def files_attributes(diff_a_b):
 	return files_attributes
 
 
-def collect_attributes(diff_base_parent1, diff_base_parent2, base_version, parent1, parent2, repo, merge):
+def collect_attributes(diff_base_parent1, diff_base_parent2, base_version, parent1, parent2, repo, merge, file_extensions):
 	
-	files_branch1 = files_attributes(diff_base_parent1)
-	files_branch2 = files_attributes(diff_base_parent2)
+	files_branch1 = files_attributes(diff_base_parent1, file_extensions)
+	files_branch2 = files_attributes(diff_base_parent2, file_extensions)
 
 	changed_files_branch1 = files_branch1['edited'].union(files_branch1['add']).union(files_branch1['rm'])
 	changed_files_branch2 = files_branch2['edited'].union(files_branch2['add']).union(files_branch2['rm'])
@@ -504,7 +504,7 @@ def analyze(commits, repo, file_extensions, output_file, normalized=False, colle
 
 						metrics = calculate_metrics(merge_actions, parent1_actions, parent2_actions, normalized, merge_commits_count)
 						if (collect):
-							 metrics.update(collect_attributes(diff_base_parent1, diff_base_parent2, base_version, parent1, parent2, repo, commit))
+							 metrics.update(collect_attributes(diff_base_parent1, diff_base_parent2, base_version, parent1, parent2, repo, commit, file_extensions))
 							
 						metrics['project'] = repo.workdir
 						commits_metrics[commit.hex] = metrics
@@ -580,7 +580,7 @@ def merge_commits(commits):
 	return merges
 	
 
-def init_analysis(repo_path, output_file, normalized, collect, commit_ids=[], url=None):
+def init_analysis(repo_path, output_file, file_extensions, normalized, collect, commit_ids=[], url=None):
 	start_time = datetime.now()
 	repo = Repository(repo_path)
 
@@ -593,7 +593,7 @@ def init_analysis(repo_path, output_file, normalized, collect, commit_ids=[], ur
 		for id in commit_ids:
 			commits.append(repo.get(id))
 
-	analyze(commits, repo, output_file, normalized, collect)
+	analyze(commits, repo, file_extensions, output_file, normalized, collect)
 
 	if url:
 		delete_repo_folder(repo.workdir)
@@ -621,7 +621,7 @@ def main():
 	elif args.local:
 		repo_path = args.local
 		
-	init_analysis(repo_path, args.output, args.normalized, args.collect, args.commit, args.url)
+	init_analysis(repo_path, args.output, args.extensions, args.normalized, args.collect, args.commit, args.url)
 
 
 if __name__ == '__main__':
