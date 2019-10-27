@@ -433,13 +433,17 @@ def collect_attributes(diff_base_parent1, diff_base_parent2, base_version, paren
 	
 	return attributes
 
-def get_actions(diff_a_b):
+	
+def get_actions(diff_a_b, file_extensions):
+
 	actions = Counter()
 	for d in diff_a_b:
 		file_name = d.delta.new_file.path
-		for h in d.hunks:
-			for l in h.lines:
-				actions.update([file_name+l.origin+l.content])
+		file_extension = os.path.splitext(file_name)[1]
+		if( file_extensions is None or file_extension in (file_extensions)):
+			for h in d.hunks:
+				for l in h.lines:
+					actions.update([file_name+l.origin+l.content])
 	return actions
 
 def clone(url):
@@ -464,7 +468,7 @@ def calculate_additional_effort(parents_actions, merge_actions):
 	return (sum(additional_actions.values()))
 
 
-def analyze(commits, repo, output_file, normalized=False, collect=False):
+def analyze(commits, repo, file_extensions, output_file, normalized=False, collect=False):
 	error = False
 	commits_metrics = {}
 	merge_commits_count = 0
@@ -491,9 +495,9 @@ def analyze(commits, repo, output_file, normalized=False, collect=False):
 						diff_base_parent1 = repo.diff(base_version, parent1, context_lines=0)
 						diff_base_parent2 = repo.diff(base_version, parent2, context_lines=0)
 							
-						merge_actions = get_actions(diff_base_final)
-						parent1_actions = get_actions(diff_base_parent1)
-						parent2_actions = get_actions(diff_base_parent2)
+						merge_actions = get_actions(diff_base_final, file_extensions)
+						parent1_actions = get_actions(diff_base_parent1, file_extensions)
+						parent2_actions = get_actions(diff_base_parent2, file_extensions)
 
 						metrics = calculate_metrics(merge_actions, parent1_actions, parent2_actions, normalized, merge_commits_count)
 						if (collect):
@@ -603,6 +607,8 @@ def main():
 	parser.add_argument("--collect",action='store_true', help="collect attributes")
 	parser.add_argument("--commit", nargs='+', help="list of commits to analyze. Default: all merge commits")
 	parser.add_argument("--output", default='output.csv', help="output file name. Default: output.csv")
+	parser.add_argument("--extensions", nargs='+',
+						help="set a file extension (or a list of files extensions separated by comma) to analyse. Default: all file extensions. Example: .py , .txt")
 	args = parser.parse_args()
 	
 	if args.url:
