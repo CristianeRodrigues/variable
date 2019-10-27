@@ -292,15 +292,18 @@ def files_attributes(diff_a_b):
 	files_rm = set()
 
 	files_attributes = {}
-
+		
 	for patch in diff_a_b:
-		if(not file_exists(patch.delta.new_file)):
-			files_rm.add(patch.delta.old_file.path)
+		file_name = patch.delta.new_file.path
+		file_extension = os.path.splitext(file_name)[1]
+		if( file_extensions is None or file_extension in (file_extensions)):
+			if(not file_exists(patch.delta.new_file)):
+				files_rm.add(patch.delta.old_file.path)
 
-		elif(not file_exists(patch.delta.old_file)):
-			files_add.add(patch.delta.new_file.path)
-		else:
-			files_edited.add(patch.delta.new_file.path)
+			elif(not file_exists(patch.delta.old_file)):
+				files_add.add(patch.delta.new_file.path)
+			else:
+				files_edited.add(patch.delta.new_file.path)
 
 	files_attributes['edited'] = files_edited
 	files_attributes['add'] = files_add
