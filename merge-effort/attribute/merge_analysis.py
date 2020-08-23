@@ -262,19 +262,21 @@ def commits_between_commits(c0,cN, repo):
 def get_total_changed_lines(lines_attributes):
 	return len(lines_attributes['add']) + len(lines_attributes['rm'])
 
-def lines_attributes(diff_a_b):
+def lines_attributes(diff_a_b, file_extensions):
 	lines_attributes = {}
 
 	add_lines = set()
 	rm_lines = set()
 	for d in diff_a_b:
 		file_name = d.delta.new_file.path
-		for h in d.hunks:
-			for l in h.lines:
-				if l.origin == "+":
-					add_lines.add(file_name + l.content)
-				else: 
-					rm_lines.add(file_name + l.content)
+		file_extension = os.path.splitext(file_name)[1]
+		if( file_extensions is None or file_extension in (file_extensions)):
+			for h in d.hunks:
+				for l in h.lines:
+					if l.origin == "+":
+						add_lines.add(file_name + l.content)
+					else: 
+						rm_lines.add(file_name + l.content)
 	lines_attributes['add'] = add_lines
 	lines_attributes['rm'] = rm_lines
 
@@ -320,8 +322,8 @@ def collect_attributes(diff_base_parent1, diff_base_parent2, base_version, paren
 	changed_files_branch1 = files_branch1['edited'].union(files_branch1['add']).union(files_branch1['rm'])
 	changed_files_branch2 = files_branch2['edited'].union(files_branch2['add']).union(files_branch2['rm'])
 
-	lines_branch1 = lines_attributes(diff_base_parent1)
-	lines_branch2 = lines_attributes(diff_base_parent2)
+	lines_branch1 = lines_attributes(diff_base_parent1, file_extensions)
+	lines_branch2 = lines_attributes(diff_base_parent2, file_extensions)
 
 	changed_lines_branch1 = lines_branch1['add'].union(lines_branch1['rm'])
 	changed_lines_branch2 = lines_branch2['add'].union(lines_branch2['rm'])
